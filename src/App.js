@@ -2,10 +2,13 @@ import React, { Component } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import GridList from '@material-ui/core/GridList';
-import GridListTile from '@material-ui/core/GridListTile';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import tileData from './tileData';
+import IconButton from '@material-ui/core/IconButton';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { BrowserRouter as Router, Route } from 'react-router-dom'
+import HomePage from './pages/Home';
+import AboutPage from './pages/About';
+import NotePage from './pages/Note';
+import AlbumPage from './pages/Album';
 
 class App extends Component {
   render() {
@@ -13,28 +16,22 @@ class App extends Component {
       <div>
         <AppBar position="fixed" color="default">
           <Toolbar>
+            <IconButton style={{ marginLeft: -12, marginRight: 20, }} color="inherit" aria-label="ArrowBack"
+              onClick={() => {window.history.back()}}>
+              <ArrowBackIcon />
+            </IconButton>
             <Typography variant="h6" color="inherit">
-              Photos
+              T2Hut
             </Typography>
           </Toolbar>
         </AppBar>
-        <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
-            overflow: 'hidden',
-            marginTop: 56,
-          }}>
-          <GridList cellHeight={160}>
-            <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
-              <ListSubheader component="div">December</ListSubheader>
-            </GridListTile>
-            {tileData.map(tile => (
-              <GridListTile key={tile.img}>
-                <img src={tile.img} alt={tile.title} />
-              </GridListTile>
-            ))}
-          </GridList>
+        <div style={{ marginTop: 56,}}>
+          <Router>
+              <Route path="/" exact component={HomePage} />
+              <Route path="/about/" component={AboutPage} />
+              <Route path="/note/" component={NotePage} />
+              <Route path="/album/" component={AlbumPage} />
+          </Router>
         </div>
       </div>
     );
