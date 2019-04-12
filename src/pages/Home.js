@@ -47,7 +47,7 @@ class Home extends Component {
               <Grid container justify="center" spacing={16}>
                 <Grid item>
                     <Fab color="default" variant="extended" aria-label="关于" className={classes.fab} style={{backgroundColor:green[400], color: "#fff"}}
-                        onClick={() => {window.location = '/about/'}}>
+                        onClick={() => {window.location = '/me/'}}>
                         <PersonIcon className={classes.extendedIcon}/>
                         我的
                     </Fab>
