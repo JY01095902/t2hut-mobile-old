@@ -26,7 +26,7 @@ class App extends Component {
             </Typography>
           </Toolbar>
         </AppBar>
-        <div style={{ marginTop: 56,}}>
+        <div style={{ marginTop: 56 }}>
           <Router>
               <Route path="/" exact component={HomePage} />
               <Route path="/about/" component={AboutPage} />
