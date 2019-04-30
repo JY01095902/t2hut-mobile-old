@@ -28,9 +28,9 @@ function createData(account, shiyanxun, hongyu) {
 const rows = [
   createData('建设银行', 1000, 1000 ),
   createData('中国银行', 5000, 4000 ),
-  createData('交通银行', 1120, 860),
-  createData('招商银行', 840, 550),
-  createData('中信银行', 840, 550),
+  createData('交通银行', 1120, 880),
+  createData('招商银行', 840, 660),
+  createData('中信银行', 840, 660),
 ];
 
 class Note extends Component {

@@ -16,6 +16,7 @@ import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 // const serviceRoot = 'http://10.202.101.62:17175'
 const serviceRoot = 'https://www.t2hut.com'
@@ -36,6 +37,12 @@ const styles = theme => ({
   chip: {
       margin: theme.spacing.unit / 2,
   },
+  progress: {
+    margin: theme.spacing.unit * 2,
+    position: 'absolute',
+    top: '30%',
+    left: '30%',
+  },
 });
 
 class Album extends Component {
@@ -43,6 +50,7 @@ class Album extends Component {
     showImageView: false,
     image: {},
     pictures: [],
+    uploadingPictures: [],
     traceMap: [],
     folders: [],
     currentFolderPath: null,
@@ -97,21 +105,65 @@ class Album extends Component {
     this.getCatalog(folder.url)
   };
   
-  handleSelectPicture = (event) => {
-    const file = event.target.files[0];
-    console.log(file)
-    const path = this.state.currentFolderPath ? this.state.currentFolderPath : "/"
-    const picture_url =  serviceRoot + '/bodleian/pictures?path=' + path
-    let formData = new FormData()
-    formData.append("image_file", file)
-    uploadPicture(picture_url, formData)
-      .then(data => {
-        let pictures = this.state.pictures
-        pictures.push(data.data)
-        console.log(pictures)
-        this.setState({pictures: pictures})
-        document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight;
-      })
+  handleSelectPicture = async (event) => {
+    if (event.target.files.length > 6) {
+      alert("最多选择6张图片")
+      return
+    }
+    function guid() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : ((r & 0x3) | 0x8);
+        return v.toString(16);
+      });
+    }
+    function readFiles() {
+      let pictures = []
+      for (const file of event.target.files) {
+        console.log(file)
+
+        let formData = new FormData()
+        formData.append("image_file", file)
+        const picture = {
+          name: `${guid()}-${file.name}`,
+          path: null,
+          thumbnail_path: null,
+          url: null,
+          thumbnail_url: null,
+          src: window.URL.createObjectURL(file),
+          formData: formData,
+        }
+
+        console.log(picture)
+        pictures.push(picture)
+      }
+      return pictures
+    };
+    const uploadingPictures = await readFiles()
+
+    const addUploadingPictures = (pictures) => {
+      let uploadingPictures = this.state.uploadingPictures
+      uploadingPictures.push(...pictures)
+      this.setState({uploadingPictures: uploadingPictures})
+    }
+    await addUploadingPictures(uploadingPictures)
+    document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight;
+
+    for (const uploadingPicture of uploadingPictures) {
+
+      const path = this.state.currentFolderPath ? this.state.currentFolderPath : "/"
+      const picture_url =  serviceRoot + '/bodleian/pictures?path=' + path
+      uploadPicture(picture_url, uploadingPicture.formData)
+        .then(data => {
+          const i = this.state.uploadingPictures.indexOf(uploadingPicture);
+          const newUploadingPictures = this.state.uploadingPictures.slice(0, i)
+          this.setState({uploadingPictures: newUploadingPictures})
+
+          let pictures = this.state.pictures
+          pictures.push(data.data)
+          console.log(pictures)
+          this.setState({pictures: pictures})
+        })
+    }
   }
 
   componentDidMount() {
@@ -120,6 +172,7 @@ class Album extends Component {
   };
   render() {
     const { classes } = this.props;
+    const pictures = this.state.pictures.concat(this.state.uploadingPictures)
     return (
       <div style={{
         marginTop: 56,
@@ -160,13 +213,25 @@ class Album extends Component {
             <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
               <ListSubheader component="div">December</ListSubheader>
             </GridListTile>
-            {this.state.pictures.map(picture => (
-              <GridListTile key={picture.name}>
-                <img src={picture.thumbnail_url} alt={picture.name} 
-                onClick={() => {this.handleClickImage(picture.url, picture.name)}}
-                />
-              </GridListTile>
-            ))}
+            {pictures.map(picture => {
+                if (picture.thumbnail_url) {
+                  return (
+                    <GridListTile key={picture.name}>
+                      <img src={picture.thumbnail_url} alt={picture.name} 
+                        onClick={() => {this.handleClickImage(picture.url, picture.name)}}
+                      />
+                    </GridListTile>
+                  )
+                }
+                else{
+                  return (
+                    <GridListTile key={picture.name}>
+                      <img src={picture.src} alt={picture.name} />
+                      <CircularProgress className={classes.progress} />
+                    </GridListTile>
+                  )
+                }
+            })}
           </GridList>
           <Dialog
             fullScreen
@@ -188,10 +253,11 @@ class Album extends Component {
             </div>
           </Dialog>
         </div>
-        <input type="file" accept=".jpeg,.jpg,.png" style={{display: 'none'}}
+        <input type="file" accept=".jpeg,.jpg,.png" style={{display: 'none'}} multiple="multiple"
           onChange={(event) => this.handleSelectPicture(event)} ref="pictureUploadInput" />
         <Fab color="primary" aria-label="Add" className={classes.addPictureButton}
           onClick={() => {
+            this.refs.pictureUploadInput.value = "";
             this.refs.pictureUploadInput.click();
           }}>
           <AddIcon />
