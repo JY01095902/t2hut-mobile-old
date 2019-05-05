@@ -16,7 +16,10 @@ import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
+import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Snackbar from '@material-ui/core/Snackbar';
+// import { object } from 'prop-types';
 
 // const serviceRoot = 'http://10.202.101.62:17175'
 const serviceRoot = 'https://www.t2hut.com'
@@ -54,13 +57,15 @@ class Album extends Component {
     traceMap: [],
     folders: [],
     currentFolderPath: null,
+    loading: false,
   };
-  handleClickImage = (src, title) => {
+  handleClickImage = (src, thumbnailSrc, title) => {
     this.setState({ 
       showImageView: true,
       image: {
-        src: src,
-        title: title
+        src: thumbnailSrc,
+        title: title,
+        originSrc: src,
       }
     });
   };
@@ -154,6 +159,7 @@ class Album extends Component {
       const picture_url =  serviceRoot + '/bodleian/pictures?path=' + path
       uploadPicture(picture_url, uploadingPicture.formData)
         .then(data => {
+          console.log("new picture", data)
           const i = this.state.uploadingPictures.indexOf(uploadingPicture);
           const newUploadingPictures = this.state.uploadingPictures.slice(0, i)
           this.setState({uploadingPictures: newUploadingPictures})
@@ -218,7 +224,7 @@ class Album extends Component {
                   return (
                     <GridListTile key={picture.name}>
                       <img src={picture.thumbnail_url} alt={picture.name} 
-                        onClick={() => {this.handleClickImage(picture.url, picture.name)}}
+                        onClick={() => {this.handleClickImage(picture.url, picture.thumbnail_url, picture.name)}}
                       />
                     </GridListTile>
                   )
@@ -243,13 +249,35 @@ class Album extends Component {
                 <IconButton color="inherit" onClick={this.handleCloseImageView} aria-label="Close">
                   <CloseIcon />
                 </IconButton>
-                <Typography variant="h6" color="inherit">
-                  {this.state.image.title}
+                <Typography variant="h6" color="inherit" style={{flexGrow: 1}}>
+                  {/* {this.state.image.title} */} 
                 </Typography>
+                 <Button color="inherit" onClick={() => {
+                    if (this.state.image.src === this.state.image.originSrc) {
+                      return
+                    }
+                    this.setState({ 
+                      image: Object.assign({}, this.state.image, {
+                        src: this.state.image.originSrc,
+                      }),
+                      loading: true
+                    });
+                 }}>查看原图</Button>
               </Toolbar>
             </AppBar>
             <div style={{ marginTop: 56 }}>
-              <img src={this.state.image.src} alt={this.state.image.title} style={{height: 'auto', width: '100%'}}/>
+              <img src={this.state.image.src} alt={this.state.image.title} style={{height: 'auto', width: '100%'}} 
+                onLoad={()=> {
+                  this.setState({loading: false})
+                }}/>
+                 <Snackbar
+                  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                  open={this.state.loading}
+                  ContentProps={{
+                    'aria-describedby': 'message-id',
+                  }}
+                  message={<span id="message-id">加载中...</span>}
+                />
             </div>
           </Dialog>
         </div>

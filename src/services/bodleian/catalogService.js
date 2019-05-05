@@ -18,6 +18,9 @@ function uploadPicture(url, formData) {
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: formData,
         url,
+        onUploadProgress: function (progressEvent) {
+            console.log("progressEvent", progressEvent)
+        },
     };
     return axios(options)   
         .then(res => {
