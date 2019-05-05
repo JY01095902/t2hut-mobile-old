@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
     root: {
@@ -9,6 +14,7 @@ const styles = theme => ({
         // justifyContent: 'center',
         flexWrap: 'wrap',
         padding: theme.spacing.unit / 2,
+        marginTop: 56,
     },
     chip: {
         margin: theme.spacing.unit / 2,
@@ -65,6 +71,17 @@ class Me extends Component {
         const { classes } = this.props;
         return (
             <div>
+              <AppBar position="fixed" color="default">
+                  <Toolbar>
+                    <IconButton style={{ marginLeft: -12, marginRight: 20, }} color="inherit" aria-label="ArrowBack"
+                        onClick={() => {window.history.back()}}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Typography variant="h6" color="inherit">
+                        Me
+                    </Typography>
+                  </Toolbar>
+              </AppBar>
                 <Paper className={classes.root}>
                     {this.state.pathData.map(data => {
                         return (

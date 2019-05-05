@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Dialog from '@material-ui/core/Dialog';
 // import Button from '@material-ui/core/Button';
@@ -10,7 +11,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 // import tileData from './tileData';
-import { fetchCatalog, uploadPicture } from '../services/bodleian/catalogService';
+import { fetchCatalog, uploadPicture, deletePicture } from '../services/bodleian/catalogService';
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
@@ -19,10 +20,13 @@ import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
+import Checkbox from '@material-ui/core/Checkbox';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 // import { object } from 'prop-types';
 
 // const serviceRoot = 'http://10.202.101.62:17175'
 const serviceRoot = 'https://www.t2hut.com'
+// const serviceRoot = 'http://192.168.1.11:17175'
 
 const styles = theme => ({
   addPictureButton: {
@@ -58,6 +62,8 @@ class Album extends Component {
     folders: [],
     currentFolderPath: null,
     loading: false,
+    editMode: false,
+    deletePictureNames: []
   };
   handleClickImage = (src, thumbnailSrc, title) => {
     this.setState({ 
@@ -172,6 +178,49 @@ class Album extends Component {
     }
   }
 
+  handleCheckPictureButtonChange = (pictureName, event) => {
+    const checked = event.target.checked
+    let deletePictureNames = this.state.deletePictureNames
+    const i = deletePictureNames.indexOf(pictureName);
+    if (checked && i < 0) {
+      deletePictureNames.push(pictureName)
+      this.setState({deletePictureNames: deletePictureNames})
+    }
+
+    if (!checked && i >= 0) {
+      const newDeletePictureNames = this.state.deletePictureNames.slice(0, i)
+      this.setState({deletePictureNames: newDeletePictureNames})
+    }
+  }
+  handleDeletePictures = async () => {
+    if (!this.state.deletePictureNames) return
+    console.log(this.state.deletePictureNames)
+
+    const path = this.state.currentFolderPath ? this.state.currentFolderPath : "/"
+    const picture_url =  serviceRoot + '/bodleian/pictures?path=' + path
+    for (const pictureName of this.state.deletePictureNames) {
+      deletePicture(picture_url, pictureName)
+          .then(data => {
+            const i = this.state.deletePictureNames.indexOf(pictureName);
+            const newDeletePictureNames= this.state.deletePictureNames.slice(0, i)
+           
+            const newPictures = []
+            for(let i = 0; i < this.state.pictures.length; i++) {
+              const picture = this.state.pictures[i]
+              if(picture.name !== pictureName) {
+                newPictures.push(picture)
+              }
+            }
+
+            this.setState({
+              pictures: newPictures,
+              deletePictureNames: newDeletePictureNames,
+              editMode: false
+            })
+          })
+    }
+  }
+
   componentDidMount() {
     const url =  serviceRoot + '/bodleian/catalog'
     this.getCatalog(url)
@@ -180,10 +229,37 @@ class Album extends Component {
     const { classes } = this.props;
     const pictures = this.state.pictures.concat(this.state.uploadingPictures)
     return (
-      <div style={{
-        marginTop: 56,
-      }}>
         <div>
+          <AppBar position="fixed" color="default">
+            <Toolbar>
+              <IconButton style={{ marginLeft: -12, marginRight: 20, }} color="inherit" aria-label="ArrowBack"
+                onClick={() => {window.history.back()}}>
+                <ArrowBackIcon />
+              </IconButton>
+              <Typography variant="h6" color="inherit" style={{flexGrow: 1}}>
+                Album
+              </Typography>
+              <Button color="inherit" style={{display: this.state.editMode? 'none' : 'flex',}}
+                onClick={() => {
+                  this.setState({ 
+                    editMode: true
+                  });
+                }}>编辑
+              </Button>
+              <Button color="inherit" style={{display: this.state.editMode? 'flex' : 'none',}}
+                onClick={() => {
+                    this.setState({
+                      editMode: false,
+                      deletePictureNames: []
+                    })
+                  }}>取消</Button>
+              <Button color="inherit" style={{display: this.state.editMode? 'flex' : 'none',}}
+                onClick={this.handleDeletePictures}>删除</Button>
+            </Toolbar>
+          </AppBar>
+          <div style={{
+            marginTop: 56,
+          }}>
             <Paper className={classes.paper}><Typography>足迹</Typography>
                 {this.state.traceMap.map(trace => {
                     return (
@@ -217,7 +293,7 @@ class Album extends Component {
           }} >
           <GridList cellHeight={160}>
             <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
-              <ListSubheader component="div">December</ListSubheader>
+              <ListSubheader component="div">图片列表</ListSubheader>
             </GridListTile>
             {pictures.map(picture => {
                 if (picture.thumbnail_url) {
@@ -225,6 +301,20 @@ class Album extends Component {
                     <GridListTile key={picture.name}>
                       <img src={picture.thumbnail_url} alt={picture.name} 
                         onClick={() => {this.handleClickImage(picture.url, picture.thumbnail_url, picture.name)}}
+                      />
+                      <GridListTileBar
+                        titlePosition="top"
+                        actionPosition="right"
+                        actionIcon={
+                          <IconButton style={{color: 'white'}}>
+                            <Checkbox style={{color: 'white', '&$checked': {color: 'white'}}} 
+                              onChange={(event) => this.handleCheckPictureButtonChange(picture.name, event)}/>
+                          </IconButton>
+                        }
+                        style = {{
+                          display: this.state.editMode? 'flex' : 'none',
+                          background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)'
+                        }}
                       />
                     </GridListTile>
                   )
@@ -252,17 +342,17 @@ class Album extends Component {
                 <Typography variant="h6" color="inherit" style={{flexGrow: 1}}>
                   {/* {this.state.image.title} */} 
                 </Typography>
-                 <Button color="inherit" onClick={() => {
-                    if (this.state.image.src === this.state.image.originSrc) {
-                      return
-                    }
-                    this.setState({ 
-                      image: Object.assign({}, this.state.image, {
-                        src: this.state.image.originSrc,
-                      }),
-                      loading: true
-                    });
-                 }}>查看原图</Button>
+                <Button color="inherit" onClick={() => {
+                  if (this.state.image.src === this.state.image.originSrc) {
+                    return
+                  }
+                  this.setState({ 
+                    image: Object.assign({}, this.state.image, {
+                      src: this.state.image.originSrc,
+                    }),
+                    loading: true
+                  });
+                }}>查看原图</Button>
               </Toolbar>
             </AppBar>
             <div style={{ marginTop: 56 }}>

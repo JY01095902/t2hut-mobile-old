@@ -18,9 +18,9 @@ function uploadPicture(url, formData) {
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: formData,
         url,
-        onUploadProgress: function (progressEvent) {
-            console.log("progressEvent", progressEvent)
-        },
+        // onUploadProgress: function (progressEvent) {
+        //     console.log("progressEvent", progressEvent)
+        // },
     };
     return axios(options)   
         .then(res => {
@@ -31,4 +31,16 @@ function uploadPicture(url, formData) {
         })
 }
 
-export { fetchCatalog, uploadPicture }
+function deletePicture(url, pictureName) {
+    return axios.delete(url, {
+            data: {picture_name: pictureName},
+        })   
+        .then(res => {
+            return res.data
+        })
+        .catch(err => {
+            return err
+        })
+}
+
+export { fetchCatalog, uploadPicture, deletePicture }
