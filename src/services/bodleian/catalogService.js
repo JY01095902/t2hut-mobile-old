@@ -1,10 +1,10 @@
 import axios from 'axios'
 
-function fetchCatalog(url) {
-    // const url = `http://10.202.101.62:17175/bodleian/catalog?path=/shiyanxun`
-    // const url = `http://10.202.101.62:17175/bodleian/catalog`
+function fetchMediums(prefix, marker) {
+    const url = `http://10.202.101.62:17175/bodleian/catalog/mediums?prefix=${prefix}&markder=${marker}`
     return axios.get(url)
         .then(res => {
+            console.log(res)
             return res.data
         })
         .catch(err => {
@@ -12,15 +12,13 @@ function fetchCatalog(url) {
         })
 }
 
-function uploadPicture(url, formData) {
+function saveMedium(prefix, formData) {
+    const url = `http://10.202.101.62:17175/bodleian/catalog/mediums?prefix=${prefix}`
     const options = {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: formData,
         url,
-        // onUploadProgress: function (progressEvent) {
-        //     console.log("progressEvent", progressEvent)
-        // },
     };
     return axios(options)   
         .then(res => {
@@ -31,10 +29,9 @@ function uploadPicture(url, formData) {
         })
 }
 
-function deletePicture(url, pictureName) {
-    return axios.delete(url, {
-            data: {picture_name: pictureName},
-        })   
+function deleteMedium(prefix, identifier, extname) {
+    const url = `http://10.202.101.62:17175/bodleian/catalog/mediums/${identifier}?prefix=${prefix}&extname=${extname}`
+    return axios.delete(url)   
         .then(res => {
             return res.data
         })
@@ -43,4 +40,4 @@ function deletePicture(url, pictureName) {
         })
 }
 
-export { fetchCatalog, uploadPicture, deletePicture }
+export { fetchMediums, saveMedium, deleteMedium }
