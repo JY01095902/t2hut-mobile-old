@@ -183,6 +183,7 @@ class Album extends Component {
     const { classes } = this.props;
     const pictures = this.state.mediums.concat(this.state.savingMediums)
 
+    console.log('location', this.props.location)
     return (
         <div>
           <AppBar position="fixed" color="default">
