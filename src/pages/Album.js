@@ -213,105 +213,106 @@ class Album extends Component {
                 onClick={this.handleDeletePictures}>删除</Button>
             </Toolbar>
           </AppBar>
-        <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
-            overflow: 'hidden',
-          }} >
-          <GridList cellHeight={160}>
-            <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
-              <ListSubheader component="div">图片列表</ListSubheader>
-            </GridListTile>
-            {pictures.map(picture => {
-                if (picture.thumbnail_url) {
-                  return (
-                    <GridListTile key={picture.identifier}>
-                      <img src={picture.thumbnail_url} alt={picture.identifier} 
-                        onClick={() => {
-                          this.handleClickImage(picture.url, picture.thumbnail_url, picture.identifier)
-                        }}
-                      />
-                      <GridListTileBar
-                        titlePosition="top"
-                        actionPosition="right"
-                        actionIcon={
-                          <IconButton style={{color: 'white'}}>
-                            <Checkbox style={{color: 'white', '&$checked': {color: 'white'}}} 
-                              onChange={(event) => {
-                                this.handleCheckPictureButtonChange(picture, event)
-                              }}/>
-                          </IconButton>
-                        }
-                        style = {{
-                          display: this.state.editMode? 'flex' : 'none',
-                          background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)'
-                        }}
-                      />
-                    </GridListTile>
-                  )
-                }
-                else{
-                  return (
-                    <GridListTile key={picture.identifier}>
-                      <img src={picture.src} alt={picture.identifier} />
-                      <CircularProgress className={classes.progress} />
-                    </GridListTile>
-                  )
-                }
-            })}
-          </GridList>
-          <Dialog
-            fullScreen
-            open={this.state.showImageView}
-            onClose={this.handleCloseImageView}
-          >
-            <AppBar position="fixed" color="default">
-              <Toolbar>
-                <IconButton color="inherit" onClick={this.handleCloseImageView} aria-label="Close">
-                  <CloseIcon />
-                </IconButton>
-                <Typography variant="h6" color="inherit" style={{flexGrow: 1}}>
-                  {/* {this.state.image.title} */} 
-                </Typography>
-                <Button color="inherit" onClick={() => {
-                  if (this.state.image.src === this.state.image.originSrc) {
-                    return
+          <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-around',
+              overflow: 'hidden',
+              marginTop: 56,
+            }} >
+            <GridList cellHeight={160}>
+              <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
+                <ListSubheader component="div">图片列表</ListSubheader>
+              </GridListTile>
+              {pictures.map(picture => {
+                  if (picture.thumbnail_url) {
+                    return (
+                      <GridListTile key={picture.identifier}>
+                        <img src={picture.thumbnail_url} alt={picture.identifier} 
+                          onClick={() => {
+                            this.handleClickImage(picture.url, picture.thumbnail_url, picture.identifier)
+                          }}
+                        />
+                        <GridListTileBar
+                          titlePosition="top"
+                          actionPosition="right"
+                          actionIcon={
+                            <IconButton style={{color: 'white'}}>
+                              <Checkbox style={{color: 'white', '&$checked': {color: 'white'}}} 
+                                onChange={(event) => {
+                                  this.handleCheckPictureButtonChange(picture, event)
+                                }}/>
+                            </IconButton>
+                          }
+                          style = {{
+                            display: this.state.editMode? 'flex' : 'none',
+                            background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)'
+                          }}
+                        />
+                      </GridListTile>
+                    )
                   }
-                  this.setState({ 
-                    image: Object.assign({}, this.state.image, {
-                      src: this.state.image.originSrc,
-                    }),
-                    loading: true
-                  });
-                }}>查看原图</Button>
-              </Toolbar>
-            </AppBar>
-            <div style={{ marginTop: 56 }}>
-              <img src={this.state.image.src} alt={this.state.image.title} style={{height: 'auto', width: '100%'}} 
-                onLoad={()=> {
-                  this.setState({loading: false})
-                }}/>
-                 <Snackbar
-                  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                  open={this.state.loading}
-                  ContentProps={{
-                    'aria-describedby': 'message-id',
-                  }}
-                  message={<span id="message-id">加载中...</span>}
-                />
-            </div>
-          </Dialog>
-        </div>
-        <input type="file" accept=".jpeg,.jpg,.png" style={{display: 'none'}} multiple="multiple"
-          onChange={(event) => this.handleSelectPicture(event)} ref="pictureUploadInput" />
-        <Fab color="primary" aria-label="Add" className={classes.addPictureButton}
-          onClick={() => {
-            this.refs.pictureUploadInput.value = "";
-            this.refs.pictureUploadInput.click();
-          }}>
-          <AddIcon />
-        </Fab>
+                  else{
+                    return (
+                      <GridListTile key={picture.identifier}>
+                        <img src={picture.src} alt={picture.identifier} />
+                        <CircularProgress className={classes.progress} />
+                      </GridListTile>
+                    )
+                  }
+              })}
+            </GridList>
+            <Dialog
+              fullScreen
+              open={this.state.showImageView}
+              onClose={this.handleCloseImageView}
+            >
+              <AppBar position="fixed" color="default">
+                <Toolbar>
+                  <IconButton color="inherit" onClick={this.handleCloseImageView} aria-label="Close">
+                    <CloseIcon />
+                  </IconButton>
+                  <Typography variant="h6" color="inherit" style={{flexGrow: 1}}>
+                    {/* {this.state.image.title} */} 
+                  </Typography>
+                  <Button color="inherit" onClick={() => {
+                    if (this.state.image.src === this.state.image.originSrc) {
+                      return
+                    }
+                    this.setState({ 
+                      image: Object.assign({}, this.state.image, {
+                        src: this.state.image.originSrc,
+                      }),
+                      loading: true
+                    });
+                  }}>查看原图</Button>
+                </Toolbar>
+              </AppBar>
+              <div style={{ marginTop: 56 }}>
+                <img src={this.state.image.src} alt={this.state.image.title} style={{height: 'auto', width: '100%'}} 
+                  onLoad={()=> {
+                    this.setState({loading: false})
+                  }}/>
+                  <Snackbar
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    open={this.state.loading}
+                    ContentProps={{
+                      'aria-describedby': 'message-id',
+                    }}
+                    message={<span id="message-id">加载中...</span>}
+                  />
+              </div>
+            </Dialog>
+          </div>
+          <input type="file" accept=".jpeg,.jpg,.png" style={{display: 'none'}} multiple="multiple"
+            onChange={(event) => this.handleSelectPicture(event)} ref="pictureUploadInput" />
+          <Fab color="primary" aria-label="Add" className={classes.addPictureButton}
+            onClick={() => {
+              this.refs.pictureUploadInput.value = "";
+              this.refs.pictureUploadInput.click();
+            }}>
+            <AddIcon />
+          </Fab>
       </div>
     );
   }
