@@ -6,10 +6,8 @@ console.log('process.env.', process.env)
 const REACT_APP_ENV = process.env.REACT_APP_ENV.trim()
 
 if (REACT_APP_ENV === 'dev') {
-  Bodleian_Service_Root = "http://localhost:9293"
-} else if (REACT_APP_ENV === 'dev-docker') {
   Bodleian_Service_Root = "http://localhost:17175/bodleian"
-}  else if (REACT_APP_ENV === 'stg') {
+} else if (REACT_APP_ENV === 'stg') {
   Bodleian_Service_Root = "https://www.t2hut.com:17175/bodleian"
 } else if (REACT_APP_ENV === 'prd') {
   Bodleian_Service_Root = "https://www.t2hut.com:17175/bodleian"

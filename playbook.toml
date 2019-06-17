@@ -12,10 +12,34 @@ actions = [
 name = "run-dev-d"
 place = "~/"
 actions = [
-  "export REACT_APP_ENV=dev-docker",
-  "npm run-script build",
+  "export REACT_APP_ENV=dev",
+  "npm run-script build .",
   "docker stop $(docker ps -a -q --filter name=t2hut-mobile)",
   "docker rm $(docker ps -a -q --filter name=t2hut-mobile)",
   "docker build --force-rm -t t2hut-mobile .",
   "docker run --name t2hut-mobile -d -p 3000:80 t2hut-mobile"
+]
+
+[[scenes]]
+name = "run-dev-all"
+place = "~/"
+actions = [
+  "export REACT_APP_ENV=dev",
+  "export BODLEIAN_ENV=dev",
+  # "docker stop $(docker ps -a -q --filter name=t2hut-mobile)",
+  # "docker rm $(docker ps -a -q --filter name=t2hut-mobile)",
+  # "docker stop $(docker ps -a -q --filter name=bodleian-catalog)",
+  # "docker rm $(docker ps -a -q --filter name=bodleian-catalog)",
+  "npm run-script build .",
+  "docker-compose up -d"
+]
+
+[[scenes]]
+name = "run-stg-all"
+place = "~/"
+actions = [
+  "export REACT_APP_ENV=stg",
+  "export BODLEIAN_ENV=stg",
+  "npm run-script build",
+  "docker-compose up -d"
 ]
